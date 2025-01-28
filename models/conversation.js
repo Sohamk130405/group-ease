@@ -8,18 +8,46 @@ const conversationSchema = new mongoose.Schema({
   branch: {
     type: String,
     required: true,
+    enum: [
+      "CS",
+      "CSAI",
+      "CSAIML",
+      "IT",
+      "AIDS",
+      "ME",
+      "ENTC",
+      "CHEM",
+      "INSTRU",
+    ],
   },
   year: {
     type: String,
     required: true,
+    enum: ["First", "Second", "Third", "Fourth"],
   },
   division: {
     type: String,
-    required: true,
+    enum: [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+    ],
   },
   batch: {
-    type: String,
-    required: true,
+    type: Number,
+    enum: [1, 2, 3, 4],
   },
   subject: {
     type: String,
@@ -32,7 +60,11 @@ const conversationSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["Tutorial", "Theory", "Lab", "General"],
+    enum: ["Tutorial", "Theory", "Lab"],
+  },
+  lastReadMessageId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Message",
   },
   notifications: [
     {

@@ -2,10 +2,13 @@
 import { NextResponse } from "next/server";
 
 export function middleware(request) {
-  const token = request.cookies.get("next-auth")?.value;
+  if (request.nextUrl.pathname === "/")
+    return NextResponse.redirect(new URL("/conversations", request.url));
+
+  const token = request.cookies.get("next-auth.session-token")?.value;
 
   // Define routes that require authentication
-  const protectedRoutes = ["/conversations", "/profile"];
+  const protectedRoutes = ["/conversations", "/profile", "/groups"];
   // Define routes for redirection
   const publicRoutes = ["/login", "/register"];
   if (
@@ -32,5 +35,5 @@ export function middleware(request) {
 
 // Configure paths where middleware applies
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile/:path*", "/settings/:path*"],
+  matcher: ["/", "/login", "/register", "/conversations", "/groups"],
 };
