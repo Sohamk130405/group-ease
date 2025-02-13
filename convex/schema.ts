@@ -1,0 +1,22 @@
+import { defineSchema, defineTable } from "convex/server";
+import { authTables } from "@convex-dev/auth/server";
+import { v } from "convex/values";
+
+const schema = defineSchema({
+  ...authTables,
+  users: defineTable({
+    name: v.string(),
+    email: v.string(),
+    password: v.string(),
+    phone: v.number(),
+    role: v.union(v.literal("student"), v.literal("faculty")),
+    prn: v.optional(v.number()),
+    branch: v.optional(v.string()),
+    div: v.optional(v.string()),
+    batch: v.optional(v.number()),
+    sem: v.optional(v.number()),
+    year: v.optional(v.string()),
+  }),
+});
+
+export default schema;
