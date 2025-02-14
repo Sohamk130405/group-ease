@@ -15,9 +15,11 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { SignInStateProps } from "@/lib/types";
+import { useAuthActions } from "@convex-dev/auth/react";
 
 export function LoginForm({ setState }: SignInStateProps) {
   const router = useRouter();
+  const { signIn } = useAuthActions();
   const { toast } = useToast(); // Initialize toast
   const [loading, setLoading] = useState(false); // Loading state
   const [email, setEmail] = useState(""); // Email state
@@ -25,15 +27,27 @@ export function LoginForm({ setState }: SignInStateProps) {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true); // Start loading
-
-    setLoading(false); // Stop loading
-
-    toast({
-      title: "Login Successful",
-      description: "You have been logged in successfully.",
-    });
-    router.push("/conversations");
+    setLoading(true);
+    try {
+      await signIn("password", {
+        email,
+        password,
+        flow: "signUp",
+      });
+      toast({
+        title: "Login Successful",
+        description: "You have been logged in successfully.",
+      });
+      router.replace("/conversations");
+    } catch {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -50,6 +64,7 @@ export function LoginForm({ setState }: SignInStateProps) {
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
+                    disabled={loading}
                     id="email"
                     type="email"
                     placeholder="m@example.com"
@@ -69,6 +84,7 @@ export function LoginForm({ setState }: SignInStateProps) {
                     </a>
                   </div>
                   <Input
+                    disabled={loading}
                     id="password"
                     type="password"
                     value={password}

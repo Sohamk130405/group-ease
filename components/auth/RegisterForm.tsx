@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SignInStateProps } from "@/lib/types";
-
+import { useAuthActions } from "@convex-dev/auth/react";
 export function RegisterForm({ setState }: SignInStateProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -36,14 +36,18 @@ export function RegisterForm({ setState }: SignInStateProps) {
     prn: "",
     rollNo: "",
     sem: "",
-    division: "",
+    div: "",
   });
+  const { signIn } = useAuthActions();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-
     try {
+      await signIn("password", {
+        ...formData,
+        flow: "signUp",
+      });
       toast({
         title: "Registration Successful",
         description: "Your account has been created successfully.",
@@ -209,9 +213,9 @@ export function RegisterForm({ setState }: SignInStateProps) {
                   </Select>
                   <Select
                     required
-                    value={formData.division}
+                    value={formData.div}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, division: value })
+                      setFormData({ ...formData, div: value })
                     }
                   >
                     <SelectTrigger className="w-full">
