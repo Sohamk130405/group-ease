@@ -1,11 +1,12 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
+import Modals from "@/components/modals";
+import JotaiProvider from "@/components/jotai-provider";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -36,8 +37,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               enableSystem
               disableTransitionOnChange
             >
-              <TooltipProvider>{children}</TooltipProvider>
-              <Toaster />
+              {" "}
+              <JotaiProvider>
+                {children}
+                <Modals />
+                <Toaster />
+              </JotaiProvider>
             </ThemeProvider>
           </ConvexClientProvider>
         </ConvexAuthNextjsServerProvider>

@@ -1,11 +1,13 @@
+"use client";
 import ItemList from "@/components/item-list";
+import GroupContainer from "@/features/group/components/group-container";
 import { ReactNode } from "react";
 
-const Layout = async ({ children }: { children: ReactNode }) => {
+const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <ItemList title={"Conversations"}>
-        <h1>Conversations</h1>
+        <GroupContainer />
       </ItemList>
       {children}
     </>

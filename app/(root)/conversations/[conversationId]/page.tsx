@@ -1,7 +1,7 @@
 import ChatInput from "./_components/input/ChatInput";
 import Body from "./_components/body/Body";
 import Header from "./_components/Header";
-import ConversationContainer from "@/components/conversations/conversation-container";
+import ConversationContainer from "@/features/conversation/components/conversation-container";
 
 interface Params {
   params: {

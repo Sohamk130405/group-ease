@@ -10,7 +10,7 @@ import {
 
 import { Loader, LogOut } from "lucide-react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useCurrentUser } from "@/server/users/use-current-user";
+import { useCurrentUser } from "@/features/user/api/use-current-user";
 
 const UserButton = () => {
   const { data, isLoading } = useCurrentUser();

@@ -18,6 +18,20 @@ const schema = defineSchema({
     sem: v.optional(v.number()),
     year: v.optional(v.string()),
   }),
+
+  groups: defineTable({
+    branch: v.string(),
+    div: v.string(),
+    batch: v.number(),
+    sem: v.number(),
+    year: v.string(),
+    subject: v.string(),
+    type: v.string(),
+    createdBy: v.id("users"),
+  })
+    .index("by_createdBy", ["createdBy"])
+    .index("by_branch_div", ["branch", "div"])
+    .index("by_branch_div_batch", ["branch", "div", "batch"]),
 });
 
 export default schema;

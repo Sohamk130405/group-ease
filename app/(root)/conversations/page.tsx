@@ -1,4 +1,4 @@
-import ConversationFallback from "@/components/conversations/conversation-fallback";
+import ConversationFallback from "@/features/conversation/components/conversation-fallback";
 
 const Conversations = () => {
   return <ConversationFallback />;

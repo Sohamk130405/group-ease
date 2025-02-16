@@ -1,5 +1,5 @@
+import { Card } from "@/components/ui/card";
 import { ReactNode } from "react";
-import { Card } from "../ui/card";
 
 const ConversationContainer = ({ children }: { children: ReactNode }) => {
   return (

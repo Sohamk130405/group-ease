@@ -1,7 +1,7 @@
 "use client";
 
-import { LoginForm } from "@/components/auth/LoginForm";
-import { RegisterForm } from "@/components/auth/RegisterForm";
+import { LoginForm } from "@/features/auth/components/LoginForm";
+import { RegisterForm } from "@/features/auth/components/RegisterForm";
 import { SignInFlow } from "@/lib/types";
 import { useState } from "react";
 
