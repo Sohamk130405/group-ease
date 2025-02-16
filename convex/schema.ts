@@ -30,8 +30,7 @@ const schema = defineSchema({
     createdBy: v.id("users"),
   })
     .index("by_createdBy", ["createdBy"])
-    .index("by_branch_div", ["branch", "div"])
-    .index("by_branch_div_batch", ["branch", "div", "batch"]),
+    .index("by_year_sem_branch_div", ["year", "sem", "branch", "div"]),
 });
 
 export default schema;

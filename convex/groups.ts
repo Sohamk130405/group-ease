@@ -7,13 +7,14 @@ const populateUser = async (ctx: QueryCtx, userId: Id<"users">) => {
   return await ctx.db.get(userId);
 };
 
-export const get = query({
+export const getMyGroups = query({
   args: {},
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
     const user = await ctx.db.get(userId);
     if (!user) return [];
+
     let groups: Doc<"groups">[] = [];
     if (user.role === "faculty") {
       groups = await ctx.db
@@ -23,10 +24,23 @@ export const get = query({
     } else {
       groups = await ctx.db
         .query("groups")
-        .withIndex("by_branch_div_batch", (q) => q.eq("branch", user.branch!))
+        .withIndex("by_year_sem_branch_div", (q) =>
+          q
+            .eq("year", user.year!)
+            .eq("sem", user.sem!)
+            .eq("branch", user.branch!)
+            .eq("div", user.div!)
+        )
         .collect();
+      const filteredGroups = groups.filter((group) =>
+        group.batch === 0
+          ? "All"
+          : group.batch === user.batch || group.batch === 0
+            ? "All"
+            : group.batch === 0
+      );
       groups = await Promise.all(
-        groups.map(async (group) => {
+        filteredGroups.map(async (group) => {
           const user = await populateUser(ctx, group.createdBy);
           return {
             ...group,
