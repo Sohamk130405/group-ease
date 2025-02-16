@@ -30,7 +30,7 @@ export function CreateGroupDialog() {
     subject: "",
     div: "",
     sem: 1,
-    batch: 1,
+    batch: 0,
   });
 
   const handleCreateGroup = async () => {
@@ -128,6 +128,7 @@ export function CreateGroupDialog() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
+                <SelectItem value="0">All</SelectItem>
                 <SelectItem value="1">Batch 1</SelectItem>
                 <SelectItem value="2">Batch 2</SelectItem>
                 <SelectItem value="3">Batch 3</SelectItem>

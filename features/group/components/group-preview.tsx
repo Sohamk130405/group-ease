@@ -33,7 +33,7 @@ const GroupPreview = ({ group, isOwner, isFaculty }: GroupPreviewProps) => {
   if (!group) return null;
   if (isFaculty) {
     return (
-      <Card>
+      <Card className="h-[230px]">
         <CardHeader>
           <CardTitle>
             {group.year} Year {group.branch} {group.div}
@@ -45,7 +45,7 @@ const GroupPreview = ({ group, isOwner, isFaculty }: GroupPreviewProps) => {
             <p className="text-sm font-medium border p-2 rounded-md w-fit whitespace-nowrap">
               Batch:{" "}
               <span className="text-sm text-muted-foreground">
-                {group.batch}
+                {group.batch === 0 ? "All" : group.batch}
               </span>
             </p>
             <p className="text-sm font-medium border p-2 rounded-md w-fit whitespace-nowrap">
@@ -86,7 +86,9 @@ const GroupPreview = ({ group, isOwner, isFaculty }: GroupPreviewProps) => {
         <div className="flex gap-2 w-full">
           <p className="text-sm font-medium border p-2 rounded-md w-fit whitespace-nowrap">
             Batch:{" "}
-            <span className="text-sm text-muted-foreground">{group.batch}</span>
+            <span className="text-sm text-muted-foreground">
+              {group.batch === 0 ? "All" : group.batch}
+            </span>
           </p>
           <p className="text-sm font-medium border p-2 rounded-md w-fit whitespace-nowrap">
             {group.type}
