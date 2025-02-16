@@ -25,10 +25,11 @@ interface GroupPreviewProps {
     createdBy: Id<"users">;
     user?: Doc<"users">;
   };
+  isOwner: boolean;
   isFaculty: boolean;
 }
 
-const GroupPreview = ({ group, isFaculty }: GroupPreviewProps) => {
+const GroupPreview = ({ group, isOwner, isFaculty }: GroupPreviewProps) => {
   if (!group) return null;
   if (isFaculty) {
     return (
@@ -54,6 +55,11 @@ const GroupPreview = ({ group, isFaculty }: GroupPreviewProps) => {
               {group.type}
             </p>
           </div>
+          {!isOwner && (
+            <p className="text-sm font-medium border p-2 rounded-md w-fit whitespace-nowrap">
+              {group.user?.name}
+            </p>
+          )}
         </CardContent>
 
         <CardFooter>
