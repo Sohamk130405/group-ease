@@ -5,12 +5,12 @@ import ConversationContainer from "@/features/conversation/components/conversati
 
 interface Params {
   params: {
-    conversationsId: string;
+    conversationId: string;
   };
 }
 
 const ParticularConversation = ({ params }: Params) => {
-  console.log(params.conversationsId);
+  console.log(params.conversationId);
   return (
     <ConversationContainer>
       <Header
