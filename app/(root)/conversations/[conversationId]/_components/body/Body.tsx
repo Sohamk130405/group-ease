@@ -1,40 +1,30 @@
 import React from "react";
 import Message from "./Message";
+import { Doc, Id } from "@/convex/_generated/dataModel";
 
-const Body = () => {
-  const messages = [
-    {
-      senderName: "John Doe",
-      senderImage: "https://randomuser.me/api/portraits",
-      content: "Hello, how are you?",
-      fromCurrentUser: true,
-      createdAt: "2021-08-01 12:00 AM",
-    },
-    {
-      senderName: "Morris Chad",
-      senderImage: "https://randomuser.me/api/portraits",
-      content: "I am fine, thank you.",
-      fromCurrentUser: false,
-      createdAt: "2021-08-01 12:00 AM",
-    },
-  ];
+interface BodyProps {
+  messages: (Doc<"messages"> & {
+    sender: Doc<"users"> | null;
+  })[];
+
+  currentUserId: Id<"users"> | undefined;
+}
+
+const Body = ({ messages, currentUserId }: BodyProps) => {
   return (
     <div className="flex-1 flex overflow-y-scroll flex-col gap-2 p-3 no-scrollbar">
-      {messages.map(
-        (
-          { senderName, senderImage, fromCurrentUser, content, createdAt },
-          index
-        ) => (
-          <Message
-            key={index}
-            senderName={senderName}
-            senderImage={senderImage}
-            content={content}
-            fromCurrentUser={fromCurrentUser}
-            createdAt={createdAt}
-          />
-        )
-      )}
+      {messages.map((message, i) => (
+        <Message
+          key={message._id}
+          senderName={message.sender?.name}
+          senderImage={message.sender?.image}
+          content={message.text}
+          fromCurrentUser={currentUserId === message.senderId}
+          createdAt={message._creationTime}
+          updatedAt={message.updatedAt}
+          isCompact={i > 0 && messages[i - 1].senderId === message.senderId}
+        />
+      ))}
     </div>
   );
 };

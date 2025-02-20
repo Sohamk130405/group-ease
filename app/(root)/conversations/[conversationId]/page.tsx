@@ -1,26 +1,43 @@
+"use client";
 import ChatInput from "./_components/input/ChatInput";
 import Body from "./_components/body/Body";
 import Header from "./_components/Header";
 import ConversationContainer from "@/features/conversation/components/conversation-container";
+import { useGetGroup } from "@/features/group/api/use-get-group";
+import { Id } from "@/convex/_generated/dataModel";
+import { useCurrentUser } from "@/features/user/api/use-current-user";
+import { useParams } from "next/navigation";
+import { useGetMessages } from "@/features/message/api/use-get-messages";
 
-interface Params {
-  params: {
-    conversationId: string;
-  };
-}
+const ParticularConversation = () => {
+  const { conversationId } = useParams();
+  const { data: group, isLoading: isGroupLoading } = useGetGroup({
+    id: conversationId as Id<"groups">,
+  });
+  const { data: user } = useCurrentUser();
+  const { data: messages } = useGetMessages({
+    groupId: conversationId as Id<"groups">,
+  });
 
-const ParticularConversation = ({ params }: Params) => {
-  console.log(params.conversationId);
+  const isOwner = group?.createdBy === user?._id;
+  const name = isOwner
+    ? `${group?.year} Year ${group?.branch} ${group?.div}`
+    : `${group?.subject} ${group?.type}`;
+
   return (
     <ConversationContainer>
-      <Header
-        imageUrl={
-          "https://static.vecteezy.com/system/resources/previews/019/896/008/original/male-user-avatar-icon-in-flat-design-style-person-signs-illustration-png.png"
-        }
-        name={"John Doe"}
-      />{" "}
-      <Body />
-      <ChatInput />
+      {!isGroupLoading ? (
+        <>
+          <Header name={name} faculty={group?.user} />
+          <Body messages={messages || []} currentUserId={user?._id} />
+          <ChatInput
+            groupId={conversationId as Id<"groups">}
+            senderId={user?._id as Id<"users">}
+          />
+        </>
+      ) : (
+        "Loading"
+      )}
     </ConversationContainer>
   );
 };

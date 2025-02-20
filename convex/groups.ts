@@ -7,6 +7,21 @@ const populateUser = async (ctx: QueryCtx, userId: Id<"users">) => {
   return await ctx.db.get(userId);
 };
 
+export const getById = query({
+  args: {
+    id: v.id("groups"),
+  },
+  handler: async (ctx, args) => {
+    const group = await ctx.db.get(args.id);
+    if (!group) return null;
+    const user = await populateUser(ctx, group.createdBy);
+    return {
+      ...group,
+      user,
+    };
+  },
+});
+
 export const getMyGroups = query({
   args: {},
   handler: async (ctx) => {

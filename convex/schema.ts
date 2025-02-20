@@ -31,6 +31,13 @@ const schema = defineSchema({
   })
     .index("by_createdBy", ["createdBy"])
     .index("by_year_sem_branch_div", ["year", "sem", "branch", "div"]),
+
+  messages: defineTable({
+    groupId: v.id("groups"),
+    senderId: v.id("users"),
+    text: v.string(),
+    updatedAt: v.number(),
+  }).index("by_groupId", ["groupId"]),
 });
 
 export default schema;
