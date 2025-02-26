@@ -12,14 +12,14 @@ interface ItemListProps {
 }
 
 const ItemList = ({ children, title, action: Action }: ItemListProps) => {
-  const { isActive } = useConversation();
+  const { isActive, isCreateTab } = useConversation();
   return (
     <Card
       className={cn(
         "hidden w-full lg:flex-none lg:w-80 p-2 overflow-y-scroll no-scrollbar",
         {
-          block: !isActive,
-          "lg:block": isActive,
+          block: !isActive && !isCreateTab,
+          "lg:block": isActive || isCreateTab,
         }
       )}
     >

@@ -28,7 +28,7 @@ const ParticularConversation = () => {
     <ConversationContainer>
       {!isGroupLoading ? (
         <>
-          <Header name={name} faculty={group?.user} />
+          <Header name={name} faculty={group?.user} groupId={conversationId as string} />
           <Body messages={messages || []} currentUserId={user?._id} />
           <ChatInput
             groupId={conversationId as Id<"groups">}

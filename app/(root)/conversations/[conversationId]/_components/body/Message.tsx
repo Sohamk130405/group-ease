@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Check, CheckCheck } from "lucide-react";
+import FilePreview from "@/components/file-preview"; // Import the new component
 
 interface MessageProps {
   senderName?: string;
@@ -15,9 +16,13 @@ interface MessageProps {
   fromCurrentUser: boolean;
   content: string;
   createdAt: number;
-  updatedAt: number;
+  updatedAt?: number;
   isCompact: boolean;
   status?: "sent" | "read";
+  file?: string;
+  fileName?: string;
+  fileType?: string;
+  fileUrl?: string;
 }
 
 const Message = ({
@@ -26,9 +31,13 @@ const Message = ({
   fromCurrentUser = false,
   content,
   createdAt,
-  updatedAt,
+  updatedAt = 0,
   isCompact = false,
   status = "sent",
+  file,
+  fileName = "",
+  fileType = "",
+  fileUrl = "",
 }: MessageProps) => {
   const isEdited = updatedAt > createdAt;
 
@@ -56,14 +65,28 @@ const Message = ({
         )}
       >
         {!fromCurrentUser && !isCompact && (
-          <span className="text-xs font-medium text-primary block mb-1">
+          <span className="text-xs text-primary font-semibold block mb-1 bg-opacity-10 px-2 py-1 rounded-lg">
             {senderName}
           </span>
         )}
-        <p className="text-sm break-words whitespace-pre-wrap leading-5">
+        {/* Render FilePreview if file is present */}
+        {file && fileType && (
+          <FilePreview
+            fileUrl={fileUrl}
+            fileName={fileName}
+            fileType={fileType}
+          />
+        )}
+        <p
+          className={cn("text-sm break-words  whitespace-pre-wrap leading-5", {
+            "text-right": fromCurrentUser,
+            "text-left": !fromCurrentUser,
+          })}
+        >
           {content}
         </p>
-        <div className="flex items-center gap-1 mt-1 w-full">
+
+        <div className="flex items-center justify-between gap-1 mt-1 w-full">
           {isEdited && (
             <TooltipProvider>
               <Tooltip>

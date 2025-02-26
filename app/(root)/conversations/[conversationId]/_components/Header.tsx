@@ -1,15 +1,17 @@
+import Hint from "@/components/hint";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Doc } from "@/convex/_generated/dataModel";
-import { CircleArrowLeft } from "lucide-react";
+import { CircleArrowLeft, FileClock } from "lucide-react";
 import Link from "next/link";
 
 interface HeaderProps {
   name: string;
   faculty: Doc<"users"> | undefined | null;
+  groupId: string;
 }
 
-const Header = ({ name, faculty }: HeaderProps) => {
+const Header = ({ name, faculty, groupId }: HeaderProps) => {
   return (
     <Card className="w-full rounded-lg flex items-center p-2 justify-between">
       <div className="flex items-center gap-2">
@@ -28,6 +30,11 @@ const Header = ({ name, faculty }: HeaderProps) => {
         </Avatar>
         <h2 className="font-semibold">{name}</h2>
       </div>
+      <Hint label="Assignments" side="left">
+        <Link href={`/assignments/${groupId}`}>
+          <FileClock />
+        </Link>
+      </Hint>
     </Card>
   );
 };

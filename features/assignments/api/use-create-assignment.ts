@@ -5,14 +5,14 @@ import { useMutation } from "convex/react";
 import { useCallback, useMemo, useState } from "react";
 
 type RequestType = {
-  text: string;
-  senderId: Id<"users">;
+  title: string;
+  content: string;
+  deadline: number;
   groupId: Id<"groups">;
   file: Id<"_storage"> | undefined;
-  fileName: string | undefined;
   fileType: string | undefined;
 };
-type ResponseType = Id<"messages"> | null;
+type ResponseType = Id<"assignments"> | null;
 type Options = {
   onSuccess?: (data: ResponseType) => void;
   onError?: (error: Error) => void;
@@ -20,7 +20,7 @@ type Options = {
   throwError?: boolean;
 };
 
-export const useCreateMessage = () => {
+export const useCreateAssignment = () => {
   const [data, setData] = useState<ResponseType>(null);
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<
@@ -32,7 +32,7 @@ export const useCreateMessage = () => {
   const isError = useMemo(() => status === "error", [status]);
   const isSettled = useMemo(() => status === "settled", [status]);
 
-  const mutation = useMutation(api.messages.create);
+  const mutation = useMutation(api.assignments.create);
   const mutate = useCallback(
     async (values: RequestType, options?: Options) => {
       try {

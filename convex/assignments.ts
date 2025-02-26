@@ -1,12 +1,18 @@
 import { v } from "convex/values";
-import { mutation, QueryCtx } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { query } from "./_generated/server";
-import { Id } from "./_generated/dataModel";
 
-const populateUser = async (ctx: QueryCtx, userId: Id<"users">) => {
-  return await ctx.db.get(userId);
-};
+export const get = query({
+  args: {
+    assignmentId: v.id("assignments"),
+  },
+  handler: async (ctx, { assignmentId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+    const assignment = await ctx.db.get(assignmentId);
+    return assignment;
+  },
+});
 
 export const getByGroupId = query({
   args: {
@@ -19,52 +25,52 @@ export const getByGroupId = query({
     const group = await ctx.db.get(groupId);
     if (!group) return [];
 
-    const messages = await ctx.db
-      .query("messages")
+    const assignments = await ctx.db
+      .query("assignments")
       .withIndex("by_groupId", (q) => q.eq("groupId", groupId))
       .collect();
 
-    const populatedMessages = await Promise.all(
-      messages.map(async (message) => {
-        const sender = await populateUser(ctx, message.senderId);
-        return { ...message, sender };
-      })
-    );
-    return populatedMessages;
+    return assignments;
   },
 });
 
 export const create = mutation({
   args: {
-    text: v.string(),
-    senderId: v.id("users"),
     groupId: v.id("groups"),
+    title: v.string(),
+    content: v.string(),
+    deadline: v.number(),
     file: v.optional(v.id("_storage")),
-    fileName: v.optional(v.string()),
     fileType: v.optional(v.string()),
   },
   handler: async (
     ctx,
-    { text, senderId, groupId, file, fileName, fileType }
+    { groupId, content, title, deadline, file, fileType }
   ) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
 
     const group = await ctx.db.get(groupId);
     if (!group) throw new Error("Group not found");
+
+    if (group.createdBy !== userId) throw new Error("Unauthorized");
+
     let fileUrl = undefined;
     if (file) {
       fileUrl = await ctx.storage.getUrl(file);
     }
-    const messageId = await ctx.db.insert("messages", {
+
+    const assignmentId = await ctx.db.insert("assignments", {
       groupId,
-      text,
-      senderId,
+      title,
+      content,
       file,
-      fileName,
+      deadline,
       fileType,
       fileUrl: fileUrl as string,
+      votes: 0,
     });
-    return messageId;
+
+    return assignmentId;
   },
 });

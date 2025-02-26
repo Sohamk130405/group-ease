@@ -36,8 +36,32 @@ const schema = defineSchema({
     groupId: v.id("groups"),
     senderId: v.id("users"),
     text: v.string(),
-    updatedAt: v.number(),
+    file: v.optional(v.id("_storage")),
+    fileName: v.optional(v.string()),
+    fileType: v.optional(v.string()),
+    fileUrl: v.optional(v.string()),
+    updatedAt: v.optional(v.number()),
   }).index("by_groupId", ["groupId"]),
+
+  assignments: defineTable({
+    groupId: v.id("groups"),
+    title: v.string(),
+    content: v.string(),
+    deadline: v.number(),
+    file: v.optional(v.id("_storage")),
+    fileUrl: v.optional(v.string()),
+    fileType: v.optional(v.string()),
+    votes: v.number(),
+  }).index("by_groupId", ["groupId"]),
+
+  submissions: defineTable({
+    assignmentId: v.id("assignments"),
+    userId: v.id("users"),
+    marks: v.number(),
+    file: v.optional(v.id("_storage")),
+    fileUrl: v.optional(v.string()),
+    fileType: v.optional(v.string()),
+  }).index("by_assignmentId", ["assignmentId"]),
 });
 
 export default schema;
