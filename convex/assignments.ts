@@ -102,3 +102,45 @@ export const upvote = mutation({
     return existingAssignment._id;
   },
 });
+
+export const update = mutation({
+  args: {
+    assignmentId: v.id("assignments"),
+    deadline: v.number(),
+    title: v.string(),
+    content: v.string(),
+    file: v.optional(v.id("_storage")),
+    fileType: v.optional(v.string()),
+  },
+  handler: async (
+    ctx,
+    { assignmentId, title, content, deadline, file, fileType }
+  ) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const existingAssignment = await ctx.db.get(assignmentId);
+    if (!existingAssignment) throw new Error("Assignment not found");
+
+    if (file) {
+      if (existingAssignment.file) {
+        await ctx.storage.delete(existingAssignment.file);
+      }
+      let fileUrl = undefined;
+      fileUrl = await ctx.storage.getUrl(file);
+      await ctx.db.patch(existingAssignment._id, {
+        file,
+        fileType,
+        fileUrl: fileUrl as string,
+      });
+    }
+
+    await ctx.db.patch(assignmentId, {
+      title,
+      content,
+      deadline,
+    });
+
+    return existingAssignment._id;
+  },
+});
