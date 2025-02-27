@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
       "wonderful-dolphin-404.convex.cloud",
     ],
   },
+  
 };
 
 export default nextConfig;

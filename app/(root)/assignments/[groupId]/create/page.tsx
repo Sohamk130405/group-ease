@@ -1,18 +1,19 @@
 "use client";
-import React, { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useState, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { File, FileText, Paperclip, XCircle } from "lucide-react";
+import { FileText, Paperclip, XCircle } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { useCreateAssignment } from "@/features/assignments/api/use-create-assignment";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Id } from "@/convex/_generated/dataModel";
 import { useGenerateUploadUrl } from "@/features/uploads/api/use-generate-upload-url";
 import AssignmmentDetailContainer from "@/features/assignments/components/AssignmentDetailContainer";
+import { NotifyAssignmentAndUsersProps, SendEmailTo } from "@/lib/send-emails";
 
 type ValuesType = {
   title: string;
@@ -31,9 +32,8 @@ const CreateAssignment = () => {
   const [file, setFile] = useState<File | null>(null);
   const { groupId } = useParams();
   const { mutate: generateUploadUrl } = useGenerateUploadUrl();
-
   const { mutate: createAssignment, isPending } = useCreateAssignment();
-
+  const router = useRouter();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isPending) return;
@@ -70,10 +70,21 @@ const CreateAssignment = () => {
         const { storageId } = await result.json();
         values.file = storageId;
       }
-      await createAssignment(values, { throwError: true });
-      toast({
-        title: "Success",
-        description: "Assignment Created",
+      await createAssignment(values, {
+        throwError: true,
+        onSuccess: async (assignmentData) => {
+          SendEmailTo(assignmentData as NotifyAssignmentAndUsersProps);
+          toast({
+            title: "Success",
+            description: "Assignment Created",
+          });
+          setTitle("");
+          setContent("");
+          setDeadline("");
+          router.replace(
+            `/assignments/${assignmentData?.assignmentDetails.assignmentLink}`
+          );
+        },
       });
     } catch {
       toast({
@@ -84,18 +95,59 @@ const CreateAssignment = () => {
     }
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
     }
-  };
+  }, []);
 
-  const removeFile = () => {
+  const removeFile = useCallback(() => {
     setFile(null);
-  };
-  // Check if the file is an image
-  const isImage = (file: File) => file.type.startsWith("image/");
-  const isVideo = (file: File) => file.type.startsWith("video/");
+  }, []);
+
+  // Check if the file is an image or video
+  const isImage = useCallback(
+    (file: File) => file.type.startsWith("image/"),
+    []
+  );
+  const isVideo = useCallback(
+    (file: File) => file.type.startsWith("video/"),
+    []
+  );
+
+  const filePreview = useMemo(() => {
+    if (file) {
+      if (isImage(file)) {
+        return (
+          <Image
+            src={URL.createObjectURL(file)}
+            alt={file.name}
+            className="object-contain w-full h-full"
+            height={720}
+            width={1200}
+          />
+        );
+      } else if (isVideo(file)) {
+        return (
+          <video
+            src={URL.createObjectURL(file)}
+            autoPlay
+            className="object-contain w-full h-full"
+          ></video>
+        );
+      } else {
+        return (
+          <div className="flex flex-col items-center justify-center">
+            <FileText className="w-10 h-10 text-gray-600" />
+            <span className="text-sm text-gray-600">
+              {file?.name.split(".").pop()?.toUpperCase()}
+            </span>
+          </div>
+        );
+      }
+    }
+    return null;
+  }, [file, isImage, isVideo]);
 
   return (
     <AssignmmentDetailContainer>
@@ -115,16 +167,14 @@ const CreateAssignment = () => {
                   placeholder="Enter title"
                 />
               </div>
-
               <div>
                 <Label htmlFor="content">Content</Label>
                 <Textarea
-                  placeholder="enter description here..."
+                  placeholder="Enter description here..."
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 flex-wrap">
                 <Input
                   type="datetime-local"
@@ -158,32 +208,11 @@ const CreateAssignment = () => {
               </div>
               {file && (
                 <div className="relative w-64 h-40 rounded-xl overflow-hidden flex items-center justify-center shadow-md">
-                  {isImage(file) ? (
-                    <Image
-                      src={URL.createObjectURL(file)}
-                      alt={file.name}
-                      className="object-contain w-full h-full"
-                      height={720}
-                      width={1200}
-                    />
-                  ) : isVideo(file) ? (
-                    <video
-                      src={URL.createObjectURL(file)}
-                      autoPlay
-                      className="object-contain w-full h-full"
-                    ></video>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center">
-                      <FileText className="w-10 h-10 text-gray-600" />
-                      <span className="text-sm text-gray-600">
-                        {file?.name.split(".").pop()?.toUpperCase()}
-                      </span>
-                    </div>
-                  )}
+                  {filePreview}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-1 right-1 hover:bg-transparent"
+                    className="absolute top-1 right-1"
                     onClick={removeFile}
                   >
                     <XCircle className="w-6 h-6 text-red-600" />

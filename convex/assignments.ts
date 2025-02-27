@@ -71,7 +71,33 @@ export const create = mutation({
       votes: [],
     });
 
-    return assignmentId;
+    const users = await ctx.db
+      .query("users")
+      .withIndex("by_year_sem_branch_div", (q) =>
+        q
+          .eq("year", group.year!)
+          .eq("sem", group.sem!)
+          .eq("branch", group.branch!)
+          .eq("div", group.div!)
+      )
+      .collect();
+
+    const filteredUsers = users.filter((user) =>
+      user.batch === 0
+        ? "All"
+        : user.batch === user.batch || user.batch === 0
+          ? "All"
+          : user.batch === 0
+    );
+    const assignmentLink = `${groupId}/${assignmentId}`;
+    const assignmentDetails = {
+      subject: group.subject,
+      title,
+      deadline,
+      assignmentLink,
+    };
+
+    return { users: filteredUsers, assignmentDetails };
   },
 });
 

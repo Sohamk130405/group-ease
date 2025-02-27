@@ -1,5 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { Doc } from "@convex-dev/auth/server";
 import { useMutation } from "convex/react";
 
 import { useCallback, useMemo, useState } from "react";
@@ -12,7 +13,15 @@ type RequestType = {
   file: Id<"_storage"> | undefined;
   fileType: string | undefined;
 };
-type ResponseType = Id<"assignments"> | null;
+type ResponseType = {
+  users: Doc<"users">[];
+  assignmentDetails: {
+    subject: string;
+    title: string;
+    deadline: number;
+    assignmentLink: string;
+  };
+} | null;
 type Options = {
   onSuccess?: (data: ResponseType) => void;
   onError?: (error: Error) => void;

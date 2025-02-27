@@ -17,7 +17,7 @@ const schema = defineSchema({
     batch: v.optional(v.number()),
     sem: v.optional(v.number()),
     year: v.optional(v.string()),
-  }),
+  }).index("by_year_sem_branch_div", ["year", "sem", "branch", "div"]),
 
   groups: defineTable({
     branch: v.string(),
