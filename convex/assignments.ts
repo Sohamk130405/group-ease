@@ -144,3 +144,32 @@ export const update = mutation({
     return existingAssignment._id;
   },
 });
+
+export const remove = mutation({
+  args: {
+    assignmentId: v.id("assignments"),
+  },
+  handler: async (ctx, { assignmentId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return null;
+
+    const assignment = await ctx.db.get(assignmentId);
+    if (!assignment) throw new Error("Assignment not found");
+
+    const submissions = await ctx.db
+      .query("submissions")
+      .withIndex("by_assignmentId", (q) => q.eq("assignmentId", assignmentId))
+      .collect();
+
+    for (const submission of submissions) {
+      if (submission.file) {
+        await ctx.storage.delete(submission.file);
+      }
+      await ctx.db.delete(submission._id);
+    }
+
+    await ctx.db.delete(assignmentId);
+
+    return assignmentId;
+  },
+});

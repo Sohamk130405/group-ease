@@ -1,7 +1,7 @@
 "use client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCurrentUser } from "@/features/user/api/use-current-user";
 import AssignmmentDetailContainer from "@/features/assignments/components/AssignmentDetailContainer";
 import { useGetAssignment } from "@/features/assignments/api/use-get-assignment";
@@ -13,13 +13,14 @@ import { Separator } from "@/components/ui/separator";
 import CreateSubmission from "@/features/submissions/components/create-submission";
 import { ChangeEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { FileText, Loader2, Paperclip, XCircle } from "lucide-react";
+import { FileText, Loader2, Paperclip, Trash, XCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { toast } from "@/hooks/use-toast";
 import { useGenerateUploadUrl } from "@/features/uploads/api/use-generate-upload-url";
+import { useRemoveAssignment } from "@/features/assignments/api/use-remove-assignment";
 
 type SubmissionType =
   | (Doc<"submissions"> & {
@@ -29,7 +30,8 @@ type SubmissionType =
   | null;
 
 const AssignmentIdPage = () => {
-  const { assignmentId } = useParams();
+  const router = useRouter();
+  const { assignmentId, groupId } = useParams();
   const { data: currentUser } = useCurrentUser();
   const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignment(
     {
@@ -63,6 +65,9 @@ const AssignmentIdPage = () => {
   const { mutate: updateAssignment, isPending: isUpdating } =
     useUpdateAssignment();
 
+  const { mutate: removeAssignment, isPending: isRemovingAssignment } =
+    useRemoveAssignment();
+
   useEffect(() => {
     const userSubmission = submissions?.find(
       (sub) => sub.userId === currentUser?._id
@@ -83,6 +88,27 @@ const AssignmentIdPage = () => {
 
   const handleEditToggle = () => {
     setIsEditing((prev) => !prev);
+  };
+
+  const handleRemoveAssignment = () => {
+    if (!confirm("Are you sure you want to delete this assignment?")) return;
+    removeAssignment(
+      { assignmentId: assignmentId as Id<"assignments"> },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Assignment Deleted Successfully",
+          });
+          router.replace(`/assignments/${groupId}/`);
+        },
+        onError: () => {
+          toast({
+            title: "Failed to delete assignment",
+            variant: "destructive",
+          });
+        },
+      }
+    );
   };
 
   const handleSaveChanges = async () => {
@@ -144,7 +170,16 @@ const AssignmentIdPage = () => {
   return (
     <AssignmmentDetailContainer>
       <Card className="p-6">
-        <CardHeader>
+        <CardHeader className="relative">
+          <Button
+            className="absolute right-0 text-primary"
+            size={"icon"}
+            variant={"outline"}
+            disabled={isRemovingAssignment}
+            onClick={handleRemoveAssignment}
+          >
+            <Trash />
+          </Button>
           <CardTitle className="text-2xl">
             {isEditing ? (
               <Input
