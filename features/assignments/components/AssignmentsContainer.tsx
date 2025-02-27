@@ -14,6 +14,8 @@ import { useGetAssignments } from "../api/use-get-assignments";
 import { Id } from "@/convex/_generated/dataModel";
 import { useCurrentUser } from "@/features/user/api/use-current-user";
 import { format } from "date-fns";
+import { useUpvoteAssignment } from "../api/use-upvote-assignment";
+import { useToast } from "@/hooks/use-toast";
 
 const AssignmentsContainer = () => {
   const { data } = useCurrentUser();
@@ -22,9 +24,14 @@ const AssignmentsContainer = () => {
   const { data: assignments, isLoading } = useGetAssignments({
     groupId: groupId as Id<"groups">,
   });
+  const { toast } = useToast();
+  const { mutate: upvote , isPending } = useUpvoteAssignment();
 
   const router = useRouter();
-
+  const handleUpvote = (id: Id<"assignments">) => {
+    upvote({ assignmentId: id });
+    toast({ title: "Extend Deadline", description: "Voted Successfully" });
+  };
   return (
     <>
       {isFaculty && (
@@ -55,9 +62,20 @@ const AssignmentsContainer = () => {
                 >
                   <PaperclipIcon className="w-4 h-4 mr-1" /> View Attachment
                 </Button>
-                <Button variant="outline" size="sm" className="col-span-2">
-                  <ArrowBigUpDash className="w-4 h-4 mr-1" /> Upvote Extend
-                  Deadline
+                <Button
+                  onClick={() => handleUpvote(assignment._id)}
+                  variant="outline"
+                  size="sm"
+                  className="col-span-2"
+                  disabled={
+                    isPending ||
+                    assignment.votes.includes(data?._id as Id<"users">)
+                  }
+                >
+                  <ArrowBigUpDash className="w-4 h-4 mr-1" />
+                  {assignment.votes.includes(data?._id as Id<"users">)
+                    ? "Already Voted"
+                    : "Upvote Extend Deadline"}
                 </Button>
 
                 <Button

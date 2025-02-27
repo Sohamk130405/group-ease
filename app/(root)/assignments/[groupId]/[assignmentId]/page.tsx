@@ -1,5 +1,6 @@
 "use client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { useParams } from "next/navigation";
 import { useCurrentUser } from "@/features/user/api/use-current-user";
 import AssignmmentDetailContainer from "@/features/assignments/components/AssignmentDetailContainer";
@@ -9,9 +10,10 @@ import { useGetSubmissions } from "@/features/submissions/api/use-get-submission
 import SubmissionsTable from "@/features/submissions/components/submissions-table";
 import { Separator } from "@/components/ui/separator";
 import CreateSubmission from "@/features/submissions/components/create-submission";
-import { Button } from "@/components/ui/button"; // Assuming you're using ShadCN UI for buttons
+import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Loader2 } from "lucide-react"; // Import Spinner Icon
 
 type SubmissionType =
   | (Doc<"submissions"> & {
@@ -23,14 +25,17 @@ type SubmissionType =
 const AssignmentIdPage = () => {
   const { assignmentId } = useParams();
   const { data: currentUser } = useCurrentUser();
-  const { data: assignment } = useGetAssignment({
-    assignmentId: assignmentId as Id<"assignments">,
-  });
+  const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignment(
+    {
+      assignmentId: assignmentId as Id<"assignments">,
+    }
+  );
   const isFaculty = currentUser?.role === "faculty";
 
-  const { data: submissions, isLoading } = useGetSubmissions({
-    assignmentId: assignmentId as Id<"assignments">,
-  });
+  const { data: submissions, isLoading: isLoadingSubmissions } =
+    useGetSubmissions({
+      assignmentId: assignmentId as Id<"assignments">,
+    });
 
   const [currentUserSubmission, setCurrentUserSubmission] =
     useState<SubmissionType>(null);
@@ -47,6 +52,10 @@ const AssignmentIdPage = () => {
     setShowCreateSubmission(true);
   };
 
+  // Calculate votes
+  const totalVotes = assignment?.votes.length || 0;
+  const votePercentage = (totalVotes / 80) * 100;
+
   return (
     <AssignmmentDetailContainer>
       <Card className="p-6">
@@ -54,43 +63,63 @@ const AssignmentIdPage = () => {
           <CardTitle className="text-2xl ">{assignment?.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="mb-4 text-muted-foreground">{assignment?.content}</p>
+          {isLoadingAssignment || isLoadingSubmissions ? (
+            <div className="flex justify-center items-center h-40">
+              <Loader2 className="animate-spin w-10 h-10 text-primary" />
+            </div>
+          ) : (
+            <>
+              <p className="mb-4 text-muted-foreground">
+                {assignment?.content}
+              </p>
 
-          {/* Check if user already submitted */}
-          {!isFaculty &&
-            (currentUserSubmission && !showCreateSubmission ? (
-              <>
-                <p className="text-lg font-semibold">Your Submission:</p>
-                {currentUserSubmission.fileUrl ? (
-                  <Button asChild variant={"outline"}>
-                    <Link
-                      href={currentUserSubmission.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+              {/* Display Votes in Progress Bar */}
+              {isFaculty && (
+                <div className="mb-4">
+                  <p className="text-md font-semibold">
+                    Votes for Extending Deadline: {totalVotes}
+                  </p>
+                  {votePercentage > 0 && (
+                    <Progress value={votePercentage} className="w-full h-4" />
+                  )}
+                </div>
+              )}
+
+              {/* Check if user already submitted */}
+              {!isFaculty &&
+                (currentUserSubmission && !showCreateSubmission ? (
+                  <>
+                    <p className="text-lg font-semibold">Your Submission:</p>
+                    {currentUserSubmission.fileUrl ? (
+                      <Button asChild variant={"outline"}>
+                        <Link
+                          href={currentUserSubmission.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View Submitted File
+                        </Link>
+                      </Button>
+                    ) : (
+                      <p>No file submitted.</p>
+                    )}
+                    <Button
+                      className="ml-2 mt-4 border-primary"
+                      onClick={handleResubmit}
+                      variant="outline"
                     >
-                      View Submitted File
-                    </Link>
-                  </Button>
+                      Resubmit
+                    </Button>
+                  </>
                 ) : (
-                  <p>No file submitted.</p>
-                )}
-                <Button
-                  className="ml-2 mt-4 border-primary"
-                  onClick={handleResubmit}
-                  variant="outline"
-                >
-                  Resubmit
-                </Button>
-              </>
-            ) : (
-              <CreateSubmission />
-            ))}
+                  <CreateSubmission />
+                ))}
 
-          <Separator className="my-4" />
+              <Separator className="my-4" />
 
-          {/* Display Submissions Only for Faculty */}
-          {isFaculty && !isLoading && (
-            <SubmissionsTable submissions={submissions} />
+              {/* Display Submissions Only for Faculty */}
+              {isFaculty && <SubmissionsTable submissions={submissions} />}
+            </>
           )}
         </CardContent>
       </Card>

@@ -68,9 +68,37 @@ export const create = mutation({
       deadline,
       fileType,
       fileUrl: fileUrl as string,
-      votes: 0,
+      votes: [],
     });
 
     return assignmentId;
+  },
+});
+
+export const upvote = mutation({
+  args: {
+    assignmentId: v.id("assignments"),
+  },
+  handler: async (ctx, { assignmentId }) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Unauthorized");
+
+    const existingAssignment = await ctx.db.get(assignmentId);
+    if (!existingAssignment) throw new Error("Assignment not found");
+
+    // Initialize votes array if not present
+    const currentVotes = existingAssignment.votes || [];
+
+    // Check if the user has already voted
+    if (currentVotes.includes(userId)) {
+      throw new Error("You have already voted for this assignment");
+    }
+
+    // Update the votes array
+    await ctx.db.patch(assignmentId, {
+      votes: [...currentVotes, userId],
+    });
+
+    return existingAssignment._id;
   },
 });

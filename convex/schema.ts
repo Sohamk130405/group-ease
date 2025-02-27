@@ -51,7 +51,7 @@ const schema = defineSchema({
     file: v.optional(v.id("_storage")),
     fileUrl: v.optional(v.string()),
     fileType: v.optional(v.string()),
-    votes: v.number(),
+    votes: v.array(v.id("users")),
   }).index("by_groupId", ["groupId"]),
 
   submissions: defineTable({
