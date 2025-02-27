@@ -171,15 +171,17 @@ const AssignmentIdPage = () => {
     <AssignmmentDetailContainer>
       <Card className="p-6">
         <CardHeader className="relative">
-          <Button
-            className="absolute right-0 text-primary"
-            size={"icon"}
-            variant={"outline"}
-            disabled={isRemovingAssignment}
-            onClick={handleRemoveAssignment}
-          >
-            <Trash />
-          </Button>
+          {isFaculty && (
+            <Button
+              className="absolute right-0 text-primary"
+              size={"icon"}
+              variant={"outline"}
+              disabled={isRemovingAssignment}
+              onClick={handleRemoveAssignment}
+            >
+              <Trash />
+            </Button>
+          )}
           <CardTitle className="text-2xl">
             {isEditing ? (
               <Input
