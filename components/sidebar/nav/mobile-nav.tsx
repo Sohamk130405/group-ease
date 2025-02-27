@@ -19,25 +19,29 @@ const MobileNav = () => {
   const { signOut } = useAuthActions();
   const [open, setOpen] = useCreateGroupModal();
   const { data } = useCurrentUser();
+  const isFaculty = data?.role === "faculty";
 
   if (isActive) return null;
   return (
     <Card className="fixed bottom-4 w-[calc(100vw-32px)] flex items-center h-16 p-2 lg:hidden">
       <nav className="w-full">
         <ul className="flex justify-evenly items-center">
-          {paths.map((path, id) => (
-            <li key={id} className="relative">
-              <Hint label={path.name}>
-                <Button
-                  size="icon"
-                  variant={path.active ? "default" : "outline"}
-                  asChild
-                >
-                  <Link href={path.href}>{<path.icon />}</Link>
-                </Button>
-              </Hint>
-            </li>
-          ))}
+          {paths.map((path, id) => {
+            if (path.name === "Groups" && !isFaculty) return;
+            return (
+              <li key={id} className="relative">
+                <Hint label={path.name}>
+                  <Button
+                    size="icon"
+                    variant={path.active ? "default" : "outline"}
+                    asChild
+                  >
+                    <Link href={path.href}>{<path.icon />}</Link>
+                  </Button>
+                </Hint>
+              </li>
+            );
+          })}
           {data && data.role === "faculty" && (
             <li>
               <Hint label="Create new group">

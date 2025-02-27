@@ -16,24 +16,27 @@ const DesktopNav = () => {
   const { signOut } = useAuthActions();
   const [open, setOpen] = useCreateGroupModal();
   const { data } = useCurrentUser();
-
+  const isFaculty = data?.role === "faculty";
   return (
     <Card className="hidden lg:flex lg:flex-col lg:justify-between lg:items-center lg:h-full lg:w-16 lg:px-2 lg:py-4">
       <nav>
         <ul className="flex flex-col items-center gap-4">
-          {paths.map((path, id) => (
-            <li key={id} className="relative">
-              <Hint label={path.name} side="right">
-                <Button
-                  size="icon"
-                  variant={path.active ? "default" : "outline"}
-                  asChild
-                >
-                  <Link href={path.href}>{<path.icon />}</Link>
-                </Button>
-              </Hint>
-            </li>
-          ))}
+          {paths.map((path, id) => {
+            if (path.name === "Groups" && !isFaculty) return;
+            return (
+              <li key={id} className="relative">
+                <Hint label={path.name} side="right">
+                  <Button
+                    size="icon"
+                    variant={path.active ? "default" : "outline"}
+                    asChild
+                  >
+                    <Link href={path.href}>{<path.icon />}</Link>
+                  </Button>
+                </Hint>
+              </li>
+            );
+          })}
         </ul>
       </nav>
       <div className="flex flex-col items-center gap-4">
