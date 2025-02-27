@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   PaperclipIcon,
-  UploadIcon,
   EyeIcon,
   CalendarIcon,
   ArrowBigUpDash,
@@ -60,20 +59,7 @@ const AssignmentsContainer = () => {
                   <ArrowBigUpDash className="w-4 h-4 mr-1" /> Upvote Extend
                   Deadline
                 </Button>
-                {!isFaculty && (
-                  <div className="grid grid-cols-2 space-x-1 col-span-2">
-                    <Button variant="outline" size="sm">
-                      <UploadIcon className="w-4 h-4 mr-1" /> Upload
-                    </Button>{" "}
-                    <Button
-                      variant={"outline"}
-                      size="sm"
-                      className="text-primary border-2 hover:border-primary hover:bg-transparent"
-                    >
-                      Submit
-                    </Button>
-                  </div>
-                )}
+
                 <Button
                   variant="outline"
                   size="sm"

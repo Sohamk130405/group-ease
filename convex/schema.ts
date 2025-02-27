@@ -61,7 +61,9 @@ const schema = defineSchema({
     file: v.optional(v.id("_storage")),
     fileUrl: v.optional(v.string()),
     fileType: v.optional(v.string()),
-  }).index("by_assignmentId", ["assignmentId"]),
+  })
+    .index("by_assignmentId", ["assignmentId"])
+    .index("by_assignmentId_userId", ["assignmentId", "userId"]),
 });
 
 export default schema;

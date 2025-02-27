@@ -125,13 +125,12 @@ const CreateAssignment = () => {
                 />
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 flex-wrap">
                 <Input
                   type="datetime-local"
                   id="deadline"
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  className="w-fit"
                 />
                 <input
                   type="file"
@@ -149,7 +148,7 @@ const CreateAssignment = () => {
                 </Button>
 
                 <Button
-                  className="text-white border-2 border-primary hover:border-white hover:bg-transparent"
+                  className="text-white border-2 border-primary hover:border-white hover:bg-transparent  md:col-span-1"
                   type="submit"
                   variant={"outline"}
                   disabled={isPending}

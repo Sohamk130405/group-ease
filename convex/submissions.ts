@@ -25,8 +25,8 @@ export const getByAssignmentId = query({
 
     const populatedsubmissions = await Promise.all(
       submissions.map(async (submission) => {
-        const sender = await populateUser(ctx, submission.userId);
-        return { ...submission, sender };
+        const user = await populateUser(ctx, submission.userId);
+        return { ...submission, user };
       })
     );
 
@@ -44,26 +44,54 @@ export const create = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
 
+    // Check if assignment exists
     const assignment = await ctx.db.get(assignmentId);
-    if (!assignment) throw new Error("assignment not found");
+    if (!assignment) throw new Error("Assignment not found");
 
+    // Check for deadline
     if (Date.now() > assignment.deadline) throw new Error("Deadline is over");
 
-    let fileUrl = undefined;
-    if (file) {
-      fileUrl = await ctx.storage.getUrl(file);
+    // Check for existing submission by the user for this assignment
+    const existingSubmission = await ctx.db
+      .query("submissions")
+      .withIndex("by_assignmentId_userId", (q) =>
+        q.eq("assignmentId", assignmentId).eq("userId", userId)
+      )
+      .unique();
+
+    // If there is an existing submission, delete the old file
+    if (existingSubmission) {
+      if (existingSubmission.file) {
+        await ctx.storage.delete(existingSubmission.file);
+      }
+
+      let fileUrl = undefined;
+      if (file) {
+        fileUrl = await ctx.storage.getUrl(file);
+      }
+
+      await ctx.db.patch(existingSubmission._id, {
+        file,
+        fileType,
+        fileUrl: fileUrl as string,
+      });
+
+      return existingSubmission._id;
+    } else {
+      let fileUrl = undefined;
+      if (file) {
+        fileUrl = await ctx.storage.getUrl(file);
+      }
+      const submissionId = await ctx.db.insert("submissions", {
+        assignmentId,
+        userId,
+        file,
+        marks: 0,
+        fileType,
+        fileUrl: fileUrl as string,
+      });
+      return submissionId;
     }
-
-    const submissionId = await ctx.db.insert("submissions", {
-      assignmentId,
-      userId,
-      file,
-      marks: 0,
-      fileType,
-      fileUrl: fileUrl as string,
-    });
-
-    return submissionId;
   },
 });
 
@@ -71,10 +99,8 @@ export const update = mutation({
   args: {
     submissionId: v.id("submissions"),
     marks: v.optional(v.number()),
-    file: v.optional(v.id("_storage")),
-    fileType: v.optional(v.string()),
   },
-  handler: async (ctx, { submissionId, marks, file, fileType }) => {
+  handler: async (ctx, { submissionId, marks }) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Unauthorized");
 
@@ -85,29 +111,10 @@ export const update = mutation({
     if (!assignment) throw new Error("Assignment not found");
 
     const user = await ctx.db.get(userId);
-    if (!user) throw new Error("Unauthorized");
-    const isFaculty = user.role === "faculty";
-
-    if (isFaculty) {
-      await ctx.db.patch(submissionId, {
-        marks,
-      });
-    } else {
-      if (file && Date.now() > assignment.deadline) {
-        throw new Error("Deadline is over");
-      }
-      if (file) {
-        if (existingSubmission.file) {
-          await ctx.storage.delete(existingSubmission.file);
-        }
-        const fileUrl = (await ctx.storage.getUrl(file)) as string;
-        await ctx.db.patch(submissionId, {
-          file,
-          fileType,
-          fileUrl,
-        });
-      }
-    }
+    if (!user || user.role !== "faculty") throw new Error("Unauthorized");
+    await ctx.db.patch(submissionId, {
+      marks,
+    });
 
     return existingSubmission._id;
   },
