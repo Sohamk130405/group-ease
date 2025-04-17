@@ -32,7 +32,7 @@ export function LoginForm({ setState }: SignInStateProps) {
       await signIn("password", {
         email,
         password,
-        flow: "signUp",
+        flow: "signIn",
       });
       toast({
         title: "Login Successful",

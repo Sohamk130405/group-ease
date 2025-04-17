@@ -2,7 +2,7 @@ import Hint from "@/components/hint";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { Doc } from "@/convex/_generated/dataModel";
-import { CircleArrowLeft, FileClock } from "lucide-react";
+import { CircleArrowLeft, FileClock, Phone } from "lucide-react";
 import Link from "next/link";
 
 interface HeaderProps {
@@ -30,11 +30,18 @@ const Header = ({ name, faculty, groupId }: HeaderProps) => {
         </Avatar>
         <h2 className="font-semibold">{name}</h2>
       </div>
-      <Hint label="Assignments" side="left">
-        <Link href={`/assignments/${groupId}`}>
-          <FileClock />
-        </Link>
-      </Hint>
+      <div className="flex items-center gap-2">
+        <Hint label="Call Faculty" side="left">
+          <Link href={`tel:${faculty?.phone}`}>
+            <Phone />
+          </Link>
+        </Hint>
+        <Hint label="Assignments" side="left">
+          <Link href={`/assignments/${groupId}`}>
+            <FileClock />
+          </Link>
+        </Hint>
+      </div>
     </Card>
   );
 };
