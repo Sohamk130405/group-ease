@@ -25,7 +25,10 @@ const Body = ({ messages, currentUserId }: BodyProps) => {
     <div className="flex-1 flex overflow-y-scroll flex-col gap-2 p-3 no-scrollbar">
       {messages.map((message, i) => (
         <Message
+          role={message.sender?.role}
+          room={message.sender?.room}
           key={message._id}
+          sender={message.sender}
           senderName={message.sender?.name}
           senderImage={message.sender?.image}
           content={message.text}

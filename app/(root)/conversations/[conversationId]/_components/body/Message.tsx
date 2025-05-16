@@ -9,6 +9,9 @@ import {
 import { cn } from "@/lib/utils";
 import { Check, CheckCheck } from "lucide-react";
 import FilePreview from "@/components/file-preview"; // Import the new component
+import { Doc } from "@convex-dev/auth/server";
+import ProfileDialog from "@/components/profile-dialog"; // add this import
+import { useState } from "react"; // add this import
 
 interface MessageProps {
   senderName?: string;
@@ -23,9 +26,15 @@ interface MessageProps {
   fileName?: string;
   fileType?: string;
   fileUrl?: string;
+  sender?: Doc<"users"> | undefined | null;
+  room?: string;
+  role?: "student" | "faculty";
 }
 
 const Message = ({
+  sender,
+  room,
+  role,
   senderName,
   senderImage,
   fromCurrentUser = false,
@@ -40,6 +49,7 @@ const Message = ({
   fileUrl = "",
 }: MessageProps) => {
   const isEdited = updatedAt > createdAt;
+  const [profileOpen, setProfileOpen] = useState(false); // add dialog state
 
   return (
     <div
@@ -49,10 +59,24 @@ const Message = ({
       })}
     >
       {!isCompact && !fromCurrentUser && (
-        <Avatar className="w-6 h-6">
-          <AvatarImage src={senderImage} />
-          <AvatarFallback>{senderName?.[0] || "M"}</AvatarFallback>
-        </Avatar>
+        <>
+          <button onClick={() => setProfileOpen(true)}>
+            <Avatar className="w-6 h-6">
+              <AvatarImage src={senderImage} />
+              <AvatarFallback>{senderName?.[0] || "M"}</AvatarFallback>
+            </Avatar>
+          </button>
+          <ProfileDialog
+            open={profileOpen}
+            onOpenChange={setProfileOpen}
+            name={sender?.name || senderName || ""}
+            image={sender?.image || senderImage}
+            email={sender?.email}
+            phone={sender?.phone}
+            room={room}
+            role={role}
+          />
+        </>
       )}
       <div
         className={cn(
