@@ -7,7 +7,7 @@ import Link from "next/link";
 
 interface HeaderProps {
   name: string;
-  faculty: Doc<"users"> | undefined | null;
+  faculty?: Doc<"users"> | undefined | null;
   groupId: string;
 }
 
